@@ -121,7 +121,7 @@ Each Task includes an expected_output field describing the desired format or sch
 
 ## License
 
-Add your preferred license file (LICENSE) to the repo.
+MIT License
 
 ## Contact / Next steps
 
