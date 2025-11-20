@@ -1,6 +1,19 @@
 from crewai import Agent, Task, Crew
 from tools import PythonCalculatorTool, WebSearchTool
 
+# Added: load .env and validate API keys
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # loads .env from project root
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+CREWAI_API_KEY = os.getenv("CREWAI_API_KEY")
+
+if not (OPENAI_API_KEY or CREWAI_API_KEY):
+    raise RuntimeError(
+        "No LLM API key found. Create a .env file with OPENAI_API_KEY=<key> or CREWAI_API_KEY=<key> and restart."
+    )
 clinical_coordinator = Agent(
     role="Clinical Research Coordinator",
     goal="Identify eligible patients and coordinate trial enrollment",

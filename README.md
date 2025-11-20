@@ -60,20 +60,30 @@ Each example follows a similar structure:
    - python3 -m venv .venv
    - source .venv/bin/activate
 
-2. Install dependencies (example)
-   - pip install -r requirements.txt
-   - If you don't have requirements.txt, install your LLM client and supporting libs, e.g.:
-     - pip install crewai openai
+2. Create a .env file in the project root with your API keys (do NOT commit this file)
+   - Example .env:
+     OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxx
+     CREWAI_API_KEY=crewai-xxxxxxxxxxxxxxxx
+   - Add .env to .gitignore:
+     echo ".env" >> .gitignore
 
-3. Run an example
+3. Install dependencies (example)
+   - pip install -r requirements.txt
+   - Required packages used by examples:
+     - python-dotenv
+     - crewai (or your LLM client)
+     - openai (if using OpenAI)
+   - Example install:
+     - pip install python-dotenv crewai openai
+
+4. Run an example
    - python agents/inventory_optimization_agent.py
    - python agents/technical_triage_agent.py
    - python agents/clinical_trial_matching_agent.py
 
-4. Inspect output
+5. Inspect output
    - Scripts call display(result). In a terminal script run, result is returned by kickoff(); printing or logging result is recommended:
      - python -c "from agents.inventory_optimization_agent import replenishment_crew; print(replenishment_crew.kickoff())"
-
 ## Configuration
 
 - LLM selection: change the llm argument on Agent creation (examples use "gpt-4o-mini").
