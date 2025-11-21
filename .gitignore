@@ -1,2 +1,10 @@
 C1M1_Lab_1_content_creation.ipynb
 .env
+.env
+.venv
+__pycache__
+*.pyc
+.git
+.gitignore
+tests/
+.vscode/

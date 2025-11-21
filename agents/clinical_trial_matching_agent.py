@@ -25,21 +25,26 @@ gemini_flash = LLM(
     model="gemini/gemini-2.0-flash",
     temperature=0.7
 )
+
+# TODO: conditionally include tools if initialized successfully
+# tool_list = [tl for tl in (calc_tool, search_tool) if tl is not None]
+
 clinical_coordinator = Agent(
     role="Clinical Research Coordinator",
     goal="Identify eligible patients and coordinate trial enrollment",
     backstory="CRC with experience in oncology trial workflows",
     llm=gemini_flash,
-    tools=[web_search_tool],
     verbose=True
 )
+
+# TODO: conditionally include tools if initialized successfully
+# tool_list = [tl for tl in (calc_tool, search_tool) if tl is not None]
 
 trial_data_engineer = Agent(
     role="Trial Registry Data Engineer",
     goal="Aggregate and normalize trial metadata from registries",
     backstory="Data engineer focused on clinical data pipelines",
-    llm=gemini_flash,
-    tools=[python_calculator_tool]
+    llm=gemini_flash
 )
 
 patient_screening_agent = Agent(
