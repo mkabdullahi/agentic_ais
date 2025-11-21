@@ -1,5 +1,5 @@
-from crewai import Agent, Task, Crew
-from tools import PythonCalculatorTool, WebSearchTool
+from crewai import Agent, Task, Crew, LLM
+from crewai_tools import SerperDevTool, CodeInterpreterTool
 
 # Added: load .env and validate API keys
 from dotenv import load_dotenv
@@ -7,20 +7,28 @@ import os
 
 load_dotenv()  # loads .env from project root
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 CREWAI_API_KEY = os.getenv("CREWAI_API_KEY")
 
-if not (OPENAI_API_KEY or CREWAI_API_KEY):
+if not (GEMINI_API_KEY or CREWAI_API_KEY):
     raise RuntimeError(
-        "No LLM API key found. Create a .env file with OPENAI_API_KEY=<key> or CREWAI_API_KEY=<key> and restart."
+        "No LLM API key found. Create a .env file with GEMINI_API_KEY=<key> or CREWAI_API_KEY=<key> and restart."
     )
+# Initialize them
+calc_tool = CodeInterpreterTool()
+search_tool = SerperDevTool()
+
+gemini_flash = LLM(
+    model="gemini/gemini-2.0-flash",
+    temperature=0.7
+)
 
 oncall_engineer = Agent(
     role="On-call Site Reliability Engineer",
     goal="Diagnose production outages and recommend remediation steps",
     backstory="SRE with 6 years handling distributed system incidents",
-    llm="gpt-4o-mini",
-    tools=[PythonCalculatorTool, WebSearchTool],
+    llm=gemini_flash,
+    tools=[calc_tool, search_tool],
     verbose=True
 )
 
@@ -28,14 +36,14 @@ diagnostics_agent = Agent(
     role="Automated Diagnostics Agent",
     goal="Run health checks, collect logs and surface root-cause signals",
     backstory="Observability specialist embedded into monitoring stack",
-    llm="gpt-4o-mini"
+    llm=gemini_flash
 )
 
 escalation_manager = Agent(
     role="Incident Escalation Coordinator",
     goal="Decide when to escalate and prepare communications",
     backstory="Incident manager with experience coordinating cross-team response",
-    llm="gpt-4o-mini"
+    llm=gemini_flash
 )
 
 VALIDATION_TASK = Task(
@@ -72,5 +80,6 @@ triage_crew = Crew(
 )
 
 # kickoff the crew process
-result = triage_crew.kickoff()
-display(result)
+if __name__ == "__main__":
+    result = triage_crew.kickoff()
+    print(result)

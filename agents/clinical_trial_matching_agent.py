@@ -1,25 +1,36 @@
-from crewai import Agent, Task, Crew
-from tools import PythonCalculatorTool, WebSearchTool
+from crewai import Agent, Task, Crew, LLM
+from crewai_tools import CodeInterpreterTool, SerperDevTool
 
 # Added: load .env and validate API keys
 from dotenv import load_dotenv
 import os
 
+
+
 load_dotenv()  # loads .env from project root
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 CREWAI_API_KEY = os.getenv("CREWAI_API_KEY")
 
-if not (OPENAI_API_KEY or CREWAI_API_KEY):
+if not (GEMINI_API_KEY or CREWAI_API_KEY):
     raise RuntimeError(
-        "No LLM API key found. Create a .env file with OPENAI_API_KEY=<key> or CREWAI_API_KEY=<key> and restart."
+        "No LLM API key found. Create a .env file with GEMINI_API_KEY=<key> or CREWAI_API_KEY=<key> and restart."
     )
+
+# Initialize them
+web_search_tool = SerperDevTool()
+python_calculator_tool = CodeInterpreterTool()
+
+gemini_flash = LLM(
+    model="gemini/gemini-2.0-flash",
+    temperature=0.7
+)
 clinical_coordinator = Agent(
     role="Clinical Research Coordinator",
     goal="Identify eligible patients and coordinate trial enrollment",
     backstory="CRC with experience in oncology trial workflows",
-    llm="gpt-4o-mini",
-    tools=[WebSearchTool],
+    llm=gemini_flash,
+    tools=[web_search_tool],
     verbose=True
 )
 
@@ -27,15 +38,15 @@ trial_data_engineer = Agent(
     role="Trial Registry Data Engineer",
     goal="Aggregate and normalize trial metadata from registries",
     backstory="Data engineer focused on clinical data pipelines",
-    llm="gpt-4o-mini",
-    tools=[PythonCalculatorTool]
+    llm=gemini_flash,
+    tools=[python_calculator_tool]
 )
 
 patient_screening_agent = Agent(
     role="Patient Screening Specialist",
     goal="Screen EHR data for eligibility criteria",
     backstory="Clinical informaticist skilled at EHR-derived phenotyping",
-    llm="gpt-4o-mini"
+    llm=gemini_flash
 )
 
 VALIDATION_TASK = Task(
@@ -72,5 +83,6 @@ matching_crew = Crew(
 )
 
 # kickoff the crew process
-result = matching_crew.kickoff()
-display(result)
+if __name__ == "__main__":
+    result = matching_crew.kickoff()
+    print(result)
